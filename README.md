@@ -1,6 +1,8 @@
-<img width="1378" height="758" alt="Screenshot 2026-04-25 at 2 20 07 PM" src="https://github.com/user-attachments/assets/b99ec3fc-936b-49fc-a7ed-f52970f2fcff" />
-<img width="1380" height="757" alt="Screenshot 2026-04-25 at 2 19 23 PM" src="https://github.com/user-attachments/assets/95d17923-fd93-4436-8fbd-ae1716b37f12" />
 <img width="1380" height="735" alt="Screenshot 2026-04-25 at 2 18 29 PM" src="https://github.com/user-attachments/assets/330a70bd-6cc0-4a07-8207-d7c8d786efc5" />
+<img width="1380" height="757" alt="Screenshot 2026-04-25 at 2 19 23 PM" src="https://github.com/user-attachments/assets/95d17923-fd93-4436-8fbd-ae1716b37f12" />
+<img width="1378" height="758" alt="Screenshot 2026-04-25 at 2 20 07 PM" src="https://github.com/user-attachments/assets/b99ec3fc-936b-49fc-a7ed-f52970f2fcff" />
+
+
 
 # QuantPulse — Financial Sentiment Terminal
 
