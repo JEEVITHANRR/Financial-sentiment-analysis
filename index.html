@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantPulse — Financial Sentiment Terminal</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- MATRIX CANVAS -->
+<canvas id="matrix-canvas"></canvas>
+
+<!-- GLOBE CANVAS -->
+<canvas id="globe-canvas"></canvas>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-wrap">
+    <div class="logo">QuantPulse</div>
+    <div class="logo-sub">MARKET SENTIMENT TERMINAL v3.1</div>
+  </div>
+  <div class="ticker-wrap">
+    <div class="ticker-scroll" id="ticker"></div>
+  </div>
+  <div class="header-right">
+    <div class="live-pill"><div class="live-dot"></div>LIVE</div>
+    <div id="hclock">--:--:--</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- KPI ROW -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">Market Sentiment</div>
+      <div class="kpi-val col-green" id="k-sentiment">0</div>
+      <div class="kpi-delta col-green">▲ BULLISH SIGNAL</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Fear & Greed Index</div>
+      <div class="kpi-val col-gold" id="k-fg">0</div>
+      <div class="kpi-delta" style="color:var(--dim);">NEUTRAL ZONE</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">News Analyzed</div>
+      <div class="kpi-val col-white" id="k-news">0</div>
+      <div class="kpi-delta" style="color:var(--dim);">LAST 24 HRS</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Positive Articles</div>
+      <div class="kpi-val col-green" id="k-pos">0%</div>
+      <div class="kpi-delta col-green">▲ 4.1% vs yesterday</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Bearish Signals</div>
+      <div class="kpi-val col-red" id="k-neg">0%</div>
+      <div class="kpi-delta col-red">▼ 2.3% vs yesterday</div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID: Gauge + Charts | News Feed -->
+  <div class="main-grid">
+
+    <!-- LEFT -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <!-- SENTIMENT GAUGE + SPARKLINES -->
+      <div class="card" id="gauge-card">
+        <div style="display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start;">
+          <div>
+            <div class="chart-title">// LIVE SENTIMENT SCORE</div>
+            <div class="gauge-wrap">
+              <svg class="gauge-svg" viewBox="0 0 220 130">
+                <defs>
+                  <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#ff2244"/>
+                    <stop offset="40%" style="stop-color:#c9a84c"/>
+                    <stop offset="100%" style="stop-color:#00ff41"/>
+                  </linearGradient>
+                </defs>
+                <!-- Track -->
+                <path d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="18" stroke-linecap="round"/>
+                <!-- Fill -->
+                <path id="gauge-fill" d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="url(#gaugeGrad)" stroke-width="18" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="283"/>
+                <!-- Needle -->
+                <line id="gauge-needle" x1="110" y1="110" x2="110" y2="30" stroke="var(--gold2)" stroke-width="2.5" stroke-linecap="round" transform-origin="110 110"/>
+                <circle cx="110" cy="110" r="6" fill="var(--gold2)"/>
+                <!-- Labels -->
+                <text x="15" y="126" fill="#ff2244" font-size="9" font-family="Share Tech Mono">BEAR</text>
+                <text x="98" y="16" fill="#c9a84c" font-size="9" font-family="Share Tech Mono">MID</text>
+                <text x="190" y="126" fill="#00ff41" font-size="9" font-family="Share Tech Mono">BULL</text>
+              </svg>
+              <div class="gauge-label-main col-green" id="gauge-num">0</div>
+              <div class="gauge-label-sub col-green" id="gauge-text">LOADING...</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="chart-title">// STOCK SPARKLINES</div>
+            <div class="spark-grid" id="spark-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7-DAY SENTIMENT TREND -->
+      <div class="card" id="trend-card">
+        <div class="chart-title">// 7-DAY SENTIMENT TREND</div>
+        <canvas id="trendChart" height="130"></canvas>
+      </div>
+
+      <!-- SENTIMENT VS PRICE SCATTER -->
+      <div class="card" id="scatter-card">
+        <div class="chart-title">// SENTIMENT vs PRICE CORRELATION</div>
+        <canvas id="scatterChart" height="150"></canvas>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: NEWS FEED -->
+    <div class="card" id="news-card" style="height:fit-content; max-height:780px; overflow:hidden;">
+      <div class="chart-title">// LIVE NEWS INTELLIGENCE <span style="color:var(--green);font-size:9px;">● STREAMING</span></div>
+      <div class="news-feed" id="news-feed"></div>
+    </div>
+
+  </div>
+
+  <!-- SENTIMENT BATTLE -->
+  <div class="battle-section">
+    <div class="sec-label">// SENTIMENT BATTLE — HEAD TO HEAD ANALYSIS</div>
+    <div class="battle-grid">
+      <div class="battle-card" id="b1">
+        <div class="battle-sym col-green" id="b1-sym">AAPL</div>
+        <div class="battle-name" id="b1-name">APPLE INC.</div>
+        <div class="battle-score-wrap">
+          <div class="battle-score col-green" id="b1-score">0</div>
+          <div>
+            <div class="battle-label">SENTIMENT SCORE</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--green);margin-top:2px;" id="b1-mood">BULLISH</div>
+          </div>
+        </div>
+        <div class="battle-bar-bg">
+          <div class="battle-bar-fill" id="b1-bar" style="background:linear-gradient(90deg,#00cc33,var(--green));"></div>
+        </div>
+        <div class="battle-stats">
+          <div class="b-stat"><span class="b-stat-label">POSITIVE</span><span class="b-stat-val col-green" id="b1-pos">0%</span></div>
+          <div class="b-stat"><span class="b-stat-label">NEUTRAL</span><span class="b-stat-val col-gold" id="b1-neu">0%</span></div>
+          <div class="b-stat"><span class="b-stat-label">NEGATIVE</span><span class="b-stat-val col-red" id="b1-neg">0%</span></div>
+        </div>
+        <canvas id="b1-chart" height="80" style="margin-top:12px;"></canvas>
+      </div>
+
+      <div class="battle-card" id="b2">
+        <div class="battle-sym col-red" id="b2-sym">TSLA</div>
+        <div class="battle-name" id="b2-name">TESLA INC.</div>
+        <div class="battle-score-wrap">
+          <div class="battle-score col-red" id="b2-score">0</div>
+          <div>
+            <div class="battle-label">SENTIMENT SCORE</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--red);margin-top:2px;" id="b2-mood">BEARISH</div>
+          </div>
+        </div>
+        <div class="battle-bar-bg">
+          <div class="battle-bar-fill" id="b2-bar" style="background:linear-gradient(90deg,#cc0022,var(--red));"></div>
+        </div>
+        <div class="battle-stats">
+          <div class="b-stat"><span class="b-stat-label">POSITIVE</span><span class="b-stat-val col-green" id="b2-pos">0%</span></div>
+          <div class="b-stat"><span class="b-stat-label">NEUTRAL</span><span class="b-stat-val col-gold" id="b2-neu">0%</span></div>
+          <div class="b-stat"><span class="b-stat-label">NEGATIVE</span><span class="b-stat-val col-red" id="b2-neg">0%</span></div>
+        </div>
+        <canvas id="b2-chart" height="80" style="margin-top:12px;"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM: FEAR GREED -->
+  <div class="bottom-grid">
+    <div class="card" id="bot1">
+      <div class="chart-title">// MARKET BREADTH ANALYSIS</div>
+      <canvas id="breadthChart" height="140"></canvas>
+    </div>
+    <div class="card" id="bot2">
+      <div class="chart-title">// SECTOR SENTIMENT RADAR</div>
+      <canvas id="radarChart" height="200"></canvas>
+    </div>
+    <div class="card" id="bot3">
+      <div class="chart-title">// FEAR &amp; GREED INDEX</div>
+      <div class="fg-wrap">
+        <svg class="fg-svg" viewBox="0 0 200 120">
+          <defs>
+            <linearGradient id="fgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#ff2244"/>
+              <stop offset="25%" style="stop-color:#ff8800"/>
+              <stop offset="50%" style="stop-color:#c9a84c"/>
+              <stop offset="75%" style="stop-color:#88cc00"/>
+              <stop offset="100%" style="stop-color:#00ff41"/>
+            </linearGradient>
+          </defs>
+          <path d="M 15 105 A 85 85 0 0 1 185 105" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="20" stroke-linecap="round"/>
+          <path d="M 15 105 A 85 85 0 0 1 185 105" fill="none" stroke="url(#fgGrad)" stroke-width="20" stroke-linecap="round" opacity="0.85"/>
+          <line id="fg-needle" x1="100" y1="105" x2="100" y2="28" stroke="white" stroke-width="2" stroke-linecap="round" transform-origin="100 105"/>
+          <circle cx="100" cy="105" r="5" fill="white"/>
+        </svg>
+        <div class="fg-value" id="fg-val">0</div>
+        <div class="fg-label" id="fg-label" style="color:var(--gold)">LOADING</div>
+        <div class="fg-scale">
+          <span style="color:#ff2244">EXTREME FEAR</span>
+          <span>FEAR</span>
+          <span style="color:var(--gold)">NEUTRAL</span>
+          <span>GREED</span>
+          <span style="color:#00ff41">EXTREME GREED</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  QUANTPULSE TERMINAL v3.1 &nbsp;|&nbsp; DATA: <span>SIMULATED LIVE FEED</span> &nbsp;|&nbsp; SENTIMENT: <span>VADER NLP ENGINE</span> &nbsp;|&nbsp; BUILT BY <span>JEEVITHAN R R</span>
+</footer>
+
+<!-- Custom Logic -->
+<script src="js/script.js"></script>
+</body>
+</html>

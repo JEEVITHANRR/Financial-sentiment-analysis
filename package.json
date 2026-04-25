@@ -1,0 +1,23 @@
+{
+  "name": "financial-sentiment-analysis",
+  "version": "3.1.0",
+  "description": "A high-performance financial market sentiment terminal.",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "financial",
+    "sentiment",
+    "terminal",
+    "threejs",
+    "chartjs",
+    "market-analysis"
+  ],
+  "author": "Jeevithan R R",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.1"
+  }
+}

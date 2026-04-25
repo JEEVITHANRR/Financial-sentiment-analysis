@@ -1,0 +1,506 @@
+:root {
+  --black: #000000;
+  --black2: #050505;
+  --black3: #0a0a0a;
+  --gold: #c9a84c;
+  --gold2: #e8c96a;
+  --gold3: #a07830;
+  --green: #00ff41;
+  --green2: #00cc33;
+  --red: #ff2244;
+  --white: #e8e8e0;
+  --dim: #555548;
+  --glass: rgba(201,168,76,0.04);
+  --glass-border: rgba(201,168,76,0.18);
+  --glass-border2: rgba(0,255,65,0.12);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Barlow Condensed', sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* MATRIX RAIN CANVAS */
+#matrix-canvas {
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  z-index: 0;
+  opacity: 0.07;
+}
+
+/* GLOBE CANVAS */
+#globe-canvas {
+  position: fixed;
+  top: 50%; right: -80px;
+  transform: translateY(-50%);
+  width: 500px; height: 500px;
+  z-index: 1;
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+/* GRID OVERLAY */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    linear-gradient(rgba(201,168,76,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  z-index: 0;
+  pointer-events:none;
+}
+
+/* HEADER */
+header {
+  position:relative; z-index:20;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 0 32px;
+  height: 52px;
+  background: rgba(0,0,0,0.95);
+  border-bottom: 1px solid var(--gold3);
+}
+
+.logo-wrap { display:flex; align-items:center; gap:14px; }
+.logo {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:26px;
+  letter-spacing:5px;
+  color: var(--gold2);
+  text-shadow: 0 0 20px rgba(201,168,76,0.5);
+}
+
+.logo-sub {
+  font-family:'Share Tech Mono', monospace;
+  font-size:10px;
+  color:var(--dim);
+  letter-spacing:3px;
+  border-left:1px solid var(--gold3);
+  padding-left:14px;
+}
+
+.ticker-wrap {
+  flex:1;
+  overflow:hidden;
+  margin: 0 40px;
+  height:100%;
+  display:flex;
+  align-items:center;
+}
+
+.ticker-scroll {
+  display:flex; gap:36px;
+  animation: ticker 28s linear infinite;
+  white-space:nowrap;
+}
+
+@keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+.tick-item {
+  font-family:'Share Tech Mono',monospace;
+  font-size:12px;
+  display:flex; gap:8px; align-items:center;
+}
+
+.tick-sym { color: var(--gold2); }
+.tick-price { color: var(--white); }
+.tick-up { color: var(--green); }
+.tick-down { color: var(--red); }
+
+.header-right {
+  display:flex; align-items:center; gap:20px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;
+}
+
+.live-pill {
+  display:flex; align-items:center; gap:6px;
+  padding: 4px 12px;
+  border:1px solid var(--green2);
+  border-radius:2px;
+  color:var(--green);
+  font-size:10px;
+  letter-spacing:2px;
+  background: rgba(0,255,65,0.04);
+}
+
+.live-dot {
+  width:6px; height:6px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  animation: blink 1.2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+#hclock {
+  color:var(--gold);
+  letter-spacing:2px;
+  font-size:13px;
+}
+
+/* MAIN */
+main {
+  position:relative; z-index:10;
+  padding: 20px 32px;
+  max-width: 1700px;
+  margin: 0 auto;
+}
+
+/* SECTION LABEL */
+.sec-label {
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;
+  letter-spacing:4px;
+  color:var(--gold3);
+  text-transform:uppercase;
+  margin-bottom:14px;
+  display:flex; align-items:center; gap:10px;
+}
+.sec-label::after {
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,var(--glass-border),transparent);
+}
+
+/* GLASS CARD */
+.card {
+  background: rgba(5,5,5,0.88);
+  border:1px solid var(--glass-border);
+  border-radius:2px;
+  padding:20px;
+  backdrop-filter:blur(8px);
+  opacity:0;
+  transform:translateY(16px);
+  transition: border-color 0.3s;
+}
+.card:hover { border-color: rgba(201,168,76,0.4); }
+
+/* KPI ROW */
+.kpi-row {
+  display:grid;
+  grid-template-columns: repeat(5,1fr);
+  gap:12px;
+  margin-bottom:20px;
+}
+
+.kpi-card {
+  background: rgba(5,5,5,0.9);
+  border:1px solid var(--glass-border);
+  border-radius:2px;
+  padding:16px 18px;
+  position:relative;
+  overflow:hidden;
+  opacity:0; transform:translateY(16px);
+}
+
+.kpi-card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+
+.kpi-label {
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;
+  letter-spacing:3px;
+  color:var(--dim);
+  margin-bottom:8px;
+  text-transform:uppercase;
+}
+
+.kpi-val {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:30px;
+  letter-spacing:2px;
+  line-height:1;
+  margin-bottom:6px;
+}
+
+.kpi-delta {
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;
+}
+
+.col-gold { color:var(--gold2); text-shadow:0 0 12px rgba(201,168,76,0.5); }
+.col-green { color:var(--green); text-shadow:0 0 12px rgba(0,255,65,0.4); }
+.col-red { color:var(--red); text-shadow:0 0 12px rgba(255,34,68,0.4); }
+.col-white { color:var(--white); }
+
+/* MAIN GRID */
+.main-grid {
+  display:grid;
+  grid-template-columns: 1fr 340px;
+  gap:16px;
+  margin-bottom:16px;
+}
+
+/* GAUGE */
+.gauge-wrap {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:10px 0;
+}
+
+.gauge-svg { width:220px; height:130px; overflow:visible; }
+
+.gauge-label-main {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:42px;
+  text-align:center;
+  letter-spacing:3px;
+  margin-top:-10px;
+}
+
+.gauge-label-sub {
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;
+  letter-spacing:3px;
+  text-align:center;
+  margin-top:4px;
+  text-transform:uppercase;
+}
+
+/* SPARKLINE GRID */
+.spark-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:10px;
+}
+
+.spark-item {
+  background:rgba(0,0,0,0.5);
+  border:1px solid rgba(201,168,76,0.1);
+  border-radius:2px;
+  padding:12px;
+}
+
+.spark-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.spark-sym {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:18px;
+  color:var(--gold2);
+  letter-spacing:2px;
+}
+.spark-price {
+  font-family:'Share Tech Mono',monospace;
+  font-size:13px;
+  color:var(--white);
+}
+.spark-chg {
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;
+  margin-bottom:6px;
+}
+
+/* NEWS FEED */
+.news-feed { max-height: 420px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--gold3) transparent; }
+
+.news-item {
+  padding:12px 0;
+  border-bottom:1px solid rgba(201,168,76,0.08);
+  animation:fadeSlide 0.4s ease forwards;
+  opacity:0;
+}
+
+@keyframes fadeSlide { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:none} }
+
+.news-meta {
+  display:flex; align-items:center; gap:8px;
+  margin-bottom:6px;
+}
+
+.sentiment-badge {
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;
+  padding:2px 8px;
+  border-radius:1px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+.badge-pos { background:rgba(0,255,65,0.1); color:var(--green); border:1px solid rgba(0,255,65,0.3); }
+.badge-neg { background:rgba(255,34,68,0.1); color:var(--red); border:1px solid rgba(255,34,68,0.3); }
+.badge-neu { background:rgba(201,168,76,0.1); color:var(--gold); border:1px solid rgba(201,168,76,0.3); }
+
+.news-source { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--dim); letter-spacing:2px; }
+.news-time { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--dim); margin-left:auto; }
+.news-headline { font-size:13px; color:var(--white); line-height:1.4; font-weight:600; }
+
+/* BOTTOM GRID */
+.bottom-grid {
+  display:grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap:16px;
+  margin-bottom:16px;
+}
+
+/* SENTIMENT BATTLE */
+.battle-section {
+  margin-bottom:16px;
+}
+
+.battle-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+.battle-card {
+  background:rgba(5,5,5,0.9);
+  border:1px solid var(--glass-border);
+  border-radius:2px;
+  padding:20px;
+  opacity:0; transform:translateY(16px);
+}
+
+.battle-sym {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:36px;
+  letter-spacing:3px;
+  margin-bottom:4px;
+}
+
+.battle-name {
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;
+  color:var(--dim);
+  letter-spacing:3px;
+  margin-bottom:16px;
+}
+
+.battle-score-wrap {
+  display:flex; align-items:center; gap:12px;
+  margin-bottom:14px;
+}
+
+.battle-score {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:52px;
+  line-height:1;
+}
+
+.battle-label {
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;
+  color:var(--dim);
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+.battle-bar-bg {
+  height:8px;
+  background:rgba(255,255,255,0.05);
+  border-radius:0;
+  overflow:hidden;
+  margin-bottom:10px;
+}
+
+.battle-bar-fill {
+  height:100%;
+  width:0%;
+  transition:width 1.5s cubic-bezier(0.34,1.56,0.64,1);
+  border-radius:0;
+}
+
+.battle-stats {
+  display:grid; grid-template-columns:1fr 1fr 1fr;
+  gap:8px; margin-top:10px;
+}
+
+.b-stat {
+  text-align:center;
+  background:rgba(0,0,0,0.4);
+  padding:8px 4px;
+  border:1px solid rgba(201,168,76,0.08);
+  border-radius:1px;
+}
+
+.b-stat-label { font-family:'Share Tech Mono',monospace; font-size:8px; color:var(--dim); letter-spacing:2px; display:block; margin-bottom:4px; }
+.b-stat-val { font-family:'Bebas Neue',sans-serif; font-size:18px; }
+
+/* TREND CHART */
+.chart-title {
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;
+  letter-spacing:3px;
+  color:var(--gold3);
+  text-transform:uppercase;
+  margin-bottom:14px;
+}
+
+/* FEAR GREED */
+.fg-wrap { display:flex; flex-direction:column; align-items:center; }
+.fg-svg { width:200px; height:120px; }
+
+.fg-value {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:54px;
+  letter-spacing:3px;
+  text-align:center;
+  margin-top:-8px;
+  line-height:1;
+}
+
+.fg-label {
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;
+  letter-spacing:3px;
+  text-align:center;
+  margin-top:4px;
+  text-transform:uppercase;
+}
+
+.fg-scale {
+  display:flex; justify-content:space-between;
+  width:100%; margin-top:12px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;
+  letter-spacing:1px;
+  color:var(--dim);
+}
+
+/* SCATTER WRAP */
+canvas { max-width:100%; }
+
+/* FOOTER */
+footer {
+  position:relative; z-index:10;
+  text-align:center;
+  padding:16px;
+  border-top:1px solid var(--gold3);
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;
+  color:var(--dim);
+  letter-spacing:3px;
+}
+
+footer span { color:var(--gold); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--gold3); border-radius:2px; }
+
+/* RESPONSIVE */
+@media(max-width:1100px) {
+  .kpi-row { grid-template-columns:repeat(3,1fr); }
+  .main-grid { grid-template-columns:1fr; }
+  .bottom-grid { grid-template-columns:1fr; }
+  .battle-grid { grid-template-columns:1fr; }
+}
+
+@media(max-width:600px) {
+  main { padding:14px 12px; }
+  header { padding:0 14px; }
+  .kpi-row { grid-template-columns:1fr 1fr; }
+  .spark-grid { grid-template-columns:1fr; }
+}
